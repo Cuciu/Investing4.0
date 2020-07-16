@@ -1,10 +1,5 @@
 import re
-from URLHandler import URLHandler
-from bs4 import BeautifulSoup
-import pandas as pd
 
-#html_string = BeautifulSoup(URLHandler('https://www.marketwatch.com/investing/stock/' + 'amzn' + '/financials'), 'html.parser')
-#html_string2 = BeautifulSoup(URLHandler('https://www.marketwatch.com/investing/stock/' + 'amzn' + '/financials/balance-sheet'), 'html.parser')
 years = []
 
 def Average(lst):
