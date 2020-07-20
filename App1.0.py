@@ -6,7 +6,6 @@ import pandas as pd
 
 app = Flask(__name__)
 
-
 @app.route('/')
 def student():
     return render_template('index.html')
@@ -40,16 +39,19 @@ def result():
             r4 = '{}%'.format(MarketWatch_Financials(string_financials)[1]) #EPS Growth Average
             r5 = '{}%'.format(MarketWatch_BalanceSheet(string_balancesheet)[0]) #Current Liabilities/Current Cash factor
             r6 = '{}%'.format(MarketWatch_BalanceSheet(string_balancesheet)[1]) #Total Liabilities/Total Cash factor
-        # listyears = Years(string_financials)
 
             r = [stockname, r1, r2, r3, r4, r5, r6]
             t.append(r)
-        df = pd.DataFrame(t)
+
+        # listyears = Years(string_financials)
+        
+        #format table data
+        t = [x for x in t if str(x) != 'nan']
+        df = pd.DataFrame(t, columns=t.pop(0))
         temp = df.to_dict('records')
         columnNames = df.columns.values
 
         return render_template("result.html", records=temp, colnames=columnNames, graphdata=0, labels='a', values='10')
-
 
 if __name__ == '__main__':
     app.run(debug=True)
