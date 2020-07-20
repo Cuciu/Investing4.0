@@ -1,7 +1,8 @@
-rom flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for
 from MarketWatch import Years, MarketWatch_Financials, MarketWatch_BalanceSheet
 from URLHandler import URLHandler
 from bs4 import BeautifulSoup
+import pandas as pd
 
 app = Flask(__name__)
 
@@ -14,30 +15,41 @@ def student():
 def result():
     if request.method == 'POST':
         result = request.form
-        baseurl = request.form['Base_Link']
+        baseurl1 = request.form['Base_Link1']
+        baseurl2 = request.form['Base_Link2']
+        baseurl3 = request.form['Base_Link3']
+        baseurl4 = request.form['Base_Link4']
+        baseurl5 = request.form['Base_Link5']
+        baseurl = [baseurl1, baseurl2, baseurl3, baseurl4, baseurl5]
+
         Years = int(request.form['Years'])
         NBShares = int(request.form['Number_Shares'])
         RealDiscountRate = float(request.form['RealDiscountRate'])
         AverageInflation = float(request.form['AverageInflation'])
         NominalDiscountRate = float(RealDiscountRate + AverageInflation)
         strNominalDiscountRate = str("Nominal Discount Rate is {}%".format(NominalDiscountRate))
+        t = [['Stock', 'Net Income Growth 5 years', 'Net Income Growth Average', 'EPS Growth 5 years', 'EPS Growth Average', 'Current Liabilities/Current Cash factor', 'Total Liabilities/Total Cash factor']]
+        for item in baseurl:
+            stockname = item.replace('https://www.marketwatch.com/investing/stock/','')
+            string_financials = BeautifulSoup(URLHandler(item + '/financials'), "html.parser")
+            string_balancesheet = BeautifulSoup(URLHandler(item + '/financials/balance-sheet'), 'html.parser')
 
-        string_financials = BeautifulSoup(URLHandler(baseurl + '/financials'), "html.parser")
-        string_balancesheet = BeautifulSoup(URLHandler(baseurl + '/financials/balance-sheet'), 'html.parser')
-
-        r1 = 'Net Income Growth 5 years: {}%'.format(MarketWatch_Financials(string_financials)[0])
-        r2 = 'Net Income Growth Average: {}%'.format(MarketWatch_Financials(string_financials)[1])
-        r3 = 'EPS Growth 5 years: {}%'.format(MarketWatch_Financials(string_financials)[2])
-        r4 = 'EPS Growth Average: {}%'.format(MarketWatch_Financials(string_financials)[1])
-        r5 = 'Current Liabilities/Current Cash factor: {}%'.format(MarketWatch_BalanceSheet(string_balancesheet)[0])
-        r6 = 'Total Liabilities/Total Cash factor: {}%'.format(MarketWatch_BalanceSheet(string_balancesheet)[1])
+            r1 = '{}%'.format(MarketWatch_Financials(string_financials)[0]) #Net Income Growth 5 years
+            r2 = '{}%'.format(MarketWatch_Financials(string_financials)[1]) #Net Income Growth Average
+            r3 = '{}%'.format(MarketWatch_Financials(string_financials)[2]) #EPS Growth 5 years
+            r4 = '{}%'.format(MarketWatch_Financials(string_financials)[1]) #EPS Growth Average
+            r5 = '{}%'.format(MarketWatch_BalanceSheet(string_balancesheet)[0]) #Current Liabilities/Current Cash factor
+            r6 = '{}%'.format(MarketWatch_BalanceSheet(string_balancesheet)[1]) #Total Liabilities/Total Cash factor
         # listyears = Years(string_financials)
 
-        r = [r1, r2, r3, r4, r5, r6]
-        print(r)
-        return render_template("result.html", result=r, graphdata=0, labels='a', values='10')
+            r = [stockname, r1, r2, r3, r4, r5, r6]
+            t.append(r)
+        df = pd.DataFrame(t)
+        temp = df.to_dict('records')
+        columnNames = df.columns.values
+
+        return render_template("result.html", records=temp, colnames=columnNames, graphdata=0, labels='a', values='10')
 
 
 if __name__ == '__main__':
     app.run(debug=True)
-
