@@ -36,13 +36,24 @@
      <p>Webscraper created with Python37 and Google App Engineand. All data is provided by&nbsp;<a href="https://www.macrotrends.net/" target="_blank" rel="noopener">https://www.macrotrends.net/</a></p>
      <p>A&nbsp;<a title="A SkyAlleys Product" href="https://www.skyalleys.com/" target="_blank" rel="noopener">Sky Alleys product</a></p>
      <p><a title="Sky Alleys" href="https://www.skyalleys.com/" target="_blank" rel="noopener"><img src="https://www.skyalleys.com/wp-content/uploads/2018/05/logoSkyA1.png" alt="SkyAlleys" width="366" height="99" /></a></p>
-      <table border = 1>
-         {% for key in result %}
-            <tr>
-               <td> {{ key }} </td>
-            </tr>
-         {% endfor %}
-      </table>
+        <table border="1">
+            <thead>
+                <tr>
+                    {% for col in colnames %}
+                    <th>{{ col }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for record in records %}
+                <tr>
+                    {% for col in colnames %}
+                    <td>{{ record[col] }}</td>
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
       <center>
           <div id="chart_div2"></div>
       </center>
