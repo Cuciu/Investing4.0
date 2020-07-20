@@ -41,3 +41,17 @@ def MarketWatch_BalanceSheet(html_string2):
     f_toatl_liabilities_assets = "%.2f" % round(100*l_total_liabilities[4]/l_total_assets[4])
     r = [f_current_liabilites_cash, f_toatl_liabilities_assets]
     return r
+
+
+def Years(string):
+    stable = string.find('table')
+    header = stable.findAll('th')
+    headers = [th.text for th in header]
+    for i in range(1,6):
+        years.append(headers[i])
+    return years
+
+#print(Years(html_string))
+
+
+
