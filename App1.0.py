@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for
-from MarketWatch import Years, MarketWatch_Financials, MarketWatch_BalanceSheet
+from MarketWatch import Years, MarketWatch_Financials, MarketWatch_BalanceSheet, MarketWatch_PricePerEarnings
 from URLHandler import URLHandler
 from bs4 import BeautifulSoup
 import pandas as pd
@@ -27,7 +27,7 @@ def result():
         AverageInflation = float(request.form['AverageInflation'])
         NominalDiscountRate = float(RealDiscountRate + AverageInflation)
         strNominalDiscountRate = str("Nominal Discount Rate is {}%".format(NominalDiscountRate))
-        t = [['Stock', 'Net Income Growth 5 years', 'Net Income Growth Average', 'EPS Growth 5 years', 'EPS Growth Average', 'Current Liabilities/Current Cash factor', 'Total Liabilities/Total Cash factor']]
+        t = [['Stock', 'Net Income Growth 5 years', 'Net Income Growth Average', 'EPS Growth 5 years', 'EPS Growth Average', 'Current Liabilities/Current Cash factor', 'Total Liabilities/Total Cash factor', 'Price/Earnings']]
         for item in baseurl:
             stockname = item.replace('https://www.marketwatch.com/investing/stock/','')
             string_financials = BeautifulSoup(URLHandler(item + '/financials'), "html.parser")
@@ -39,12 +39,13 @@ def result():
             r4 = '{}%'.format(MarketWatch_Financials(string_financials)[1]) #EPS Growth Average
             r5 = '{}%'.format(MarketWatch_BalanceSheet(string_balancesheet)[0]) #Current Liabilities/Current Cash factor
             r6 = '{}%'.format(MarketWatch_BalanceSheet(string_balancesheet)[1]) #Total Liabilities/Total Cash factor
+            r7 = '{}'.format(MarketWatch_PricePerEarnings(string_financials)) #Price per ernings
 
-            r = [stockname, r1, r2, r3, r4, r5, r6]
+            r = [stockname, r1, r2, r3, r4, r5, r6, r7]
             t.append(r)
 
         # listyears = Years(string_financials)
-        
+
         #format table data
         t = [x for x in t if str(x) != 'nan']
         df = pd.DataFrame(t, columns=t.pop(0))
