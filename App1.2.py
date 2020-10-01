@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for
-from MarketWatch02 import MarketWatch_NetIncome_Growth
+from MarketWatch02 import MarketWatch_Value_Growth
 from URLHandler import URLHandler
 from bs4 import BeautifulSoup
 import pandas as pd
@@ -46,11 +46,12 @@ def result():
             string_financials = Read(item)[1]
             string_balancesheet = Read(item)[2]
 
-            # Net Income Growth 5 years
-            r1 = '{}%'.format(MarketWatch_NetIncome_Growth(string_financials)[0])
-            r2 = '{}%'.format(MarketWatch_NetIncome_Growth(string_financials)[1])
-            r3 = 0 #EPS Growth 5 years
-            r4 = 0 #EPS Growth Average
+            # Net Income Growth
+            r1 = '{}%'.format(MarketWatch_Value_Growth(string_financials, 'Consolidated Net Income')[0])
+            r2 = '{}%'.format(MarketWatch_Value_Growth(string_financials, 'Consolidated Net Income')[1])
+            # EPS Growth
+            r3 = '{}%'.format(MarketWatch_Value_Growth(string_financials, ' EPS (Diluted)')[0])
+            r4 = '{}%'.format(MarketWatch_Value_Growth(string_financials, ' EPS (Diluted)')[1])
             r5 = 0 #Current Liabilities/Current Cash factor
             r6 = 0 #Total Liabilities/Total Cash factor
             r7 = 0 #Price per ernings
