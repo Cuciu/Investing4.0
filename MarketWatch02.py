@@ -6,6 +6,7 @@ from bs4 import BeautifulSoup
 #html_string = BeautifulSoup(URLHandler('https://www.marketwatch.com/investing/stock/goog/financials'), "html.parser")
 #html_string2 = BeautifulSoup(URLHandler('https://www.marketwatch.com/investing/stock/khc/profile'), 'html.parser')
 #string = html_string.find_all('tr', attrs={'class': 'mainRow'})
+#value = ' EPS (Diluted)'
 
 def Average(lst):
     return sum(lst) / len(lst)
@@ -13,21 +14,22 @@ def Average(lst):
 def MarKetWatch_Financials(string, valuename):
     all_data = []
     for a in string:
-        netincome = {}
-        netincome['name'] = a.td.text
-        if netincome['name'] == valuename:
-            netincome['data'] = str(re.findall(r"\[.*\]", str(a.td.findNext('td', attrs='miniGraphCell'))))
+        value = {}
+        value['name'] = a.td.text
+        if value['name'] == valuename:
+            value['data'] = str(re.findall(r"\[.*\]", str(a.td.findNext('td', attrs='miniGraphCell'))))
             for item in {'\[\'\[', '\]\'\]'}:
-                netincome['data'] = re.sub(item, '', netincome['data'])
-            netincome['data'] = netincome['data'].split(',')
-            all_data.append(netincome)
+                value['data'] = re.sub(item, '', value['data'])
+            value['data'] = value['data'].split(',')
+            all_data.append(value)
     return all_data
 
-def MarketWatch_NetIncome_Growth(string):
-    data = MarKetWatch_Financials(string, 'Consolidated Net Income')
-    NetIncome_Growth = "%.2f" % round(100*(int(data[0]['data'][4]) - int(data[0]['data'][0]))/int(data[0]['data'][0]))
-    NetIncome_Growth_average = "%.2f" % round(Average([100*((int(data[0]['data'][i+1]) - int(data[0]['data'][i]))/int(data[0]['data'][i])) for i in range(0, 3)]), 2)
-    r = [NetIncome_Growth, NetIncome_Growth_average]
+def MarketWatch_Value_Growth(string, value):
+    data = MarKetWatch_Financials(string, value)
+    Value_Growth = "%.2f" % round(100*(float(data[0]['data'][4]) - float(data[0]['data'][0]))/float(data[0]['data'][0]))
+    Value_Growth_average = "%.2f" % round(Average([100*((float(data[0]['data'][i+1]) - float(data[0]['data'][i]))/float(data[0]['data'][i])) for i in range(0, 4)]), 2)
+    print([100*((float(data[0]['data'][i+1]) - float(data[0]['data'][i]))/float(data[0]['data'][i])) for i in range(0, 4)])
+    r = [Value_Growth, Value_Growth_average]
     return r
 
 #MarketWatch Profile
