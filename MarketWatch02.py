@@ -5,8 +5,9 @@ from bs4 import BeautifulSoup
 
 #html_string = BeautifulSoup(URLHandler('https://www.marketwatch.com/investing/stock/goog/financials'), "html.parser")
 #html_string2 = BeautifulSoup(URLHandler('https://www.marketwatch.com/investing/stock/khc/profile'), 'html.parser')
-#string = html_string.find_all('tr', attrs={'class': 'mainRow'})
-#value = ' EPS (Diluted)'
+#html_string2 = BeautifulSoup(URLHandler('https://www.marketwatch.com/investing/stock/goog/financials/balance-sheet'), 'html.parser')
+#string_balancesheet = html_string2.find_all('tr', attrs={'class': {'totalRow', 'mainRow', 'partialSum'}})
+#string = BeautifulSoup(URLHandler('https://www.marketwatch.com/investing/stock/goog/profile'), "html.parser")
 
 def Average(lst):
     return sum(lst) / len(lst)
@@ -28,20 +29,24 @@ def MarketWatch_Value_Growth(string, value):
     data = MarKetWatch_Financials(string, value)
     Value_Growth = "%.2f" % round(100*(float(data[0]['data'][4]) - float(data[0]['data'][0]))/float(data[0]['data'][0]))
     Value_Growth_average = "%.2f" % round(Average([100*((float(data[0]['data'][i+1]) - float(data[0]['data'][i]))/float(data[0]['data'][i])) for i in range(0, 4)]), 2)
-    print([100*((float(data[0]['data'][i+1]) - float(data[0]['data'][i]))/float(data[0]['data'][i])) for i in range(0, 4)])
     r = [Value_Growth, Value_Growth_average]
     return r
 
+def MarketWatch_Cash_Factor(string, value1, value2):
+    cash = MarKetWatch_Financials(string, value2)
+    liabilities = MarKetWatch_Financials(string, value1)
+    factor = "%.2f" % round(100*(float(liabilities[0]['data'][4])/float(cash[0]['data'][4])))
+    return factor
+
 #MarketWatch Profile
-def Test2(string):
+def MarketWatch_Profile(string, value):
     base = string.find('div', attrs={'class': 'sixwide addgutter'})
     section = base.findAll('div', attrs={'class': 'section'})
     all_data = []
     for item in section:
         data = {}
         data['name'] = item.p.text
-        data['value'] = item.p.findNext('p').text
-        if data['name'] == 'P/E Current':
+        data['data'] = item.p.findNext('p').text
+        if data['name'] == value:
             all_data.append(data)
     return all_data
-#print(Test2(html_string2)[0]['value'])
