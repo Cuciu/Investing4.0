@@ -5,6 +5,7 @@ Through this app you  will be able to apply some of the basic Value Investing fo
 You can run it on your PC by installing Python 3.8 and the dependencies or simply deploy it as an app on Google App Engine on GCP.
 
 # MarketWatch.com web scrapper
+* It ompares 5 different stocks chosen by you, preferably from the same industry
 
 # It Calculates:
 * Net Income Growth 5 years 
