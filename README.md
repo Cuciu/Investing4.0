@@ -16,5 +16,5 @@ You can run it on your PC by installing Python 3.8 and the dependencies or simpl
 * Total Liabilities/Total Cash factor
 * Price/Earnings
 
-#Demo
+#Demo 
 ![Demo Image](https://www.skyalleys.com/wp-content/uploads/2020/10/WebScrapper4.0.png)
