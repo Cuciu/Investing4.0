@@ -4,7 +4,6 @@ from URLHandler import URLHandler
 from bs4 import BeautifulSoup
 import pandas as pd
 
-url = 'https://www.marketwatch.com/investing/stock/goog/'
 def Read(url):
     stockname = url.replace('https://www.marketwatch.com/investing/stock/', '')
     string_financials = BeautifulSoup(URLHandler(str(url) + '/financials'), "html.parser")
