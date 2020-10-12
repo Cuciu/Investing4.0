@@ -40,13 +40,13 @@ def MarketWatch_Cash_Factor(string, value1, value2):
 
 #MarketWatch Profile
 def MarketWatch_Profile(string, value):
-    base = string.find('div', attrs={'class': 'sixwide addgutter'})
-    section = base.findAll('div', attrs={'class': 'section'})
+    base = string.find('div', attrs={'class': 'element element--table'})
+    section = base.findAll('tr', attrs={'class': 'table__row'})
     all_data = []
     for item in section:
         data = {}
-        data['name'] = item.p.text
-        data['data'] = item.p.findNext('p').text
+        data['name'] = item.find('td', attrs={'class': 'table__cell w75'}).text
+        data['data'] = item.find('td', attrs={'class': 'table__cell w25'}).text
         if data['name'] == value:
             all_data.append(data)
     return all_data
