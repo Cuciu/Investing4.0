@@ -27,8 +27,13 @@ def MarKetWatch_Financials(string, valuename):
 
 def MarketWatch_Value_Growth(string, value):
     data = MarKetWatch_Financials(string, value)
-    Value_Growth = "%.2f" % round(100*(float(data[0]['data'][4]) - float(data[0]['data'][0]))/float(data[0]['data'][0]))
-    Value_Growth_average = "%.2f" % round(Average([100*((float(data[0]['data'][i+1]) - float(data[0]['data'][i]))/float(data[0]['data'][i])) for i in range(0, 4)]), 2)
+    print(data)
+    try:
+        Value_Growth = "%.2f" % round(100*(float(data[0]['data'][4]) - float(data[0]['data'][0]))/float(data[0]['data'][0]))
+        Value_Growth_average = "%.2f" % round(Average([100*((float(data[0]['data'][i+1]) - float(data[0]['data'][i]))/float(data[0]['data'][i])) for i in range(0, 4)]), 2)
+    except:
+        Value_Growth = 0
+        Value_Growth_average = 0
     r = [Value_Growth, Value_Growth_average]
     return r
 
@@ -42,11 +47,23 @@ def MarketWatch_Cash_Factor(string, value1, value2):
 def MarketWatch_Profile(string, value):
     base = string.find('div', attrs={'class': 'element element--table'})
     section = base.findAll('tr', attrs={'class': 'table__row'})
+    print(section)
     all_data = []
     for item in section:
         data = {}
-        data['name'] = item.find('td', attrs={'class': 'table__cell w75'}).text
-        data['data'] = item.find('td', attrs={'class': 'table__cell w25'}).text
+        try:
+            data['name'] = item.find('td', attrs={'class': 'table__cell w75'}).text
+            data['data'] = item.find('td', attrs={'class': 'table__cell w25'}).text
+        except AttributeError:
+            data['name'] = 0
+            data['data'] = 0
         if data['name'] == value:
             all_data.append(data)
     return all_data
+
+#RORE Last Year
+#RORE Last 5 years
+
+#NPV 5 years
+#Overpriced formula
+
