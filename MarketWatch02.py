@@ -18,10 +18,13 @@ def MarKetWatch_Financials(string, valuename):
         value = {}
         value['name'] = a.td.text
         if value['name'] == valuename:
-            value['data'] = str(re.findall(r"\[.*\]", str(a.td.findNext('td', attrs='miniGraphCell'))))
-            for item in {'\[\'\[', '\]\'\]'}:
-                value['data'] = re.sub(item, '', value['data'])
-            value['data'] = value['data'].split(',')
+            try:
+                value['data'] = str(re.findall(r"\[.*\]", str(a.td.findNext('td', attrs='miniGraphCell'))))
+                for item in {'\[\'\[', '\]\'\]'}:
+                    value['data'] = re.sub(item, '', value['data'])
+                value['data'] = value['data'].split(',')
+            except:
+                value['data'] = 0
             all_data.append(value)
     return all_data
 
