@@ -23,14 +23,14 @@ def student():
 @app.route('/result', methods=['POST', 'GET'])
 def result():
     if request.method == 'POST':
-        result = request.form
-        baseurl1 = request.form['Base_Link1']
-        baseurl2 = request.form['Base_Link2']
-        baseurl3 = request.form['Base_Link3']
-        baseurl4 = request.form['Base_Link4']
-        baseurl5 = request.form['Base_Link5']
-        urls = [baseurl1, baseurl2, baseurl3, baseurl4, baseurl5]
-
+        urls = []
+        for i in range(4):
+            try:
+                d = i+1
+                baseurl = request.form[f'Base_Link{i+1}']
+                urls.append(baseurl)
+            except:
+                baseurl = 0
         #Years = int(request.form['Years'])
         NBShares = int(request.form['Number_Shares'])
         RealDiscountRate = float(request.form['RealDiscountRate'])
@@ -47,17 +47,32 @@ def result():
             string_profile = Read(item)[3]
 
             # Net Income Growth
-            r1 = '{}%'.format(MarketWatch_Value_Growth(string_financials, 'Consolidated Net Income')[0])
-            r2 = '{}%'.format(MarketWatch_Value_Growth(string_financials, 'Consolidated Net Income')[1])
+            try:
+                r1 = '{}%'.format(MarketWatch_Value_Growth(string_financials, 'Consolidated Net Income')[0])
+                r2 = '{}%'.format(MarketWatch_Value_Growth(string_financials, 'Consolidated Net Income')[1])
+            except:
+                r1 = 0
+                r2=0
             # EPS Growth
-            r3 = '{}%'.format(MarketWatch_Value_Growth(string_financials, ' EPS (Diluted)')[0])
-            r4 = '{}%'.format(MarketWatch_Value_Growth(string_financials, ' EPS (Diluted)')[1])
+            try:
+                r3 = '{}%'.format(MarketWatch_Value_Growth(string_financials, ' EPS (Diluted)')[0])
+                r4 = '{}%'.format(MarketWatch_Value_Growth(string_financials, ' EPS (Diluted)')[1])
+            except:
+                r3 = 0
+                r4 = 0
             #Current Liabilities/Current Cash factor
-            r5 = '{}%'.format(MarketWatch_Cash_Factor(string_balancesheet, ' Total Current Liabilities', ' Cash & Short Term Investments'))
-            #Total Liabilities/Total Assets
-            r6 = '{}%'.format(MarketWatch_Cash_Factor(string_balancesheet, ' Total Liabilities', ' Total Assets'))
+            # Total Liabilities/Total Assets
+            try:
+                r5 = '{}%'.format(MarketWatch_Cash_Factor(string_balancesheet, ' Total Current Liabilities', ' Cash & Short Term Investments'))
+                r6 = '{}%'.format(MarketWatch_Cash_Factor(string_balancesheet, ' Total Liabilities', ' Total Assets'))
+            except:
+                r5 = 0
+                r6 = 0
             #Price per ernings
-            r7 = '{}'.format(MarketWatch_Profile(string_profile, 'P/E Current')[0]['data'])
+            try:
+                r7 = '{}'.format(MarketWatch_Profile(string_profile, 'P/E Current')[0]['data'])
+            except:
+                r7 = 0
 
             r = [stockname, r1, r2, r3, r4, r5, r6, r7]
             t.append(r)
