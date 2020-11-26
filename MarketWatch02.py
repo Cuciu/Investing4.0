@@ -30,7 +30,6 @@ def MarKetWatch_Financials(string, valuename):
 
 def MarketWatch_Value_Growth(string, value):
     data = MarKetWatch_Financials(string, value)
-    print(data)
     try:
         Value_Growth = "%.2f" % round(100*(float(data[0]['data'][4]) - float(data[0]['data'][0]))/float(data[0]['data'][0]))
         Value_Growth_average = "%.2f" % round(Average([100*((float(data[0]['data'][i+1]) - float(data[0]['data'][i]))/float(data[0]['data'][i])) for i in range(0, 4)]), 2)
