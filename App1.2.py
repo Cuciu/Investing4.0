@@ -25,11 +25,11 @@ def result():
     if request.method == 'POST':
         urls = []
         for i in range(4):
-            try:
-                d = i+1
+            if request.form[f'Base_Link{i+1}'] != '':
                 baseurl = request.form[f'Base_Link{i+1}']
+                print(baseurl)
                 urls.append(baseurl)
-            except:
+            else:
                 baseurl = 0
         #Years = int(request.form['Years'])
         NBShares = int(request.form['Number_Shares'])
