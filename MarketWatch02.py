@@ -3,11 +3,9 @@ import requests
 from URLHandler import URLHandler
 from bs4 import BeautifulSoup
 
-#html_string = BeautifulSoup(URLHandler('https://www.marketwatch.com/investing/stock/goog/financials'), "html.parser")
-#html_string2 = BeautifulSoup(URLHandler('https://www.marketwatch.com/investing/stock/khc/profile'), 'html.parser')
-#html_string2 = BeautifulSoup(URLHandler('https://www.marketwatch.com/investing/stock/goog/financials/balance-sheet'), 'html.parser')
-#string_balancesheet = html_string2.find_all('tr', attrs={'class': {'totalRow', 'mainRow', 'partialSum'}})
-#string = BeautifulSoup(URLHandler('https://www.marketwatch.com/investing/stock/goog/profile'), "html.parser")
+#html_string = BeautifulSoup(URLHandler('https://www.marketwatch.com/investing/stock/goog/financials'), "lxml")
+#financials = html_string.find_all('tr', attrs={'class': 'table__row'})
+#test = html_string.find_all('div', attrs={'class': 'cell__content fixed--cell'})
 
 def Average(lst):
     return sum(lst) / len(lst)
@@ -16,17 +14,17 @@ def MarKetWatch_Financials(string, valuename):
     all_data = []
     for a in string:
         value = {}
-        value['name'] = a.td.text
+        value['name'] = a.text
         if value['name'] == valuename:
             try:
-                value['data'] = str(re.findall(r"\[.*\]", str(a.td.findNext('td', attrs='miniGraphCell'))))
-                for item in {'\[\'\[', '\]\'\]'}:
-                    value['data'] = re.sub(item, '', value['data'])
+                value['data'] = a.find_next('div', attrs={'class': 'chart--financials js-financial-chart'})['data-chart-data']
                 value['data'] = value['data'].split(',')
+                print(value['data'])
             except:
                 value['data'] = 0
             all_data.append(value)
     return all_data
+#print(MarKetWatch_Financials(test, 'Consolidated Net Income'))
 
 def MarketWatch_Value_Growth(string, value):
     data = MarKetWatch_Financials(string, value)
@@ -45,11 +43,15 @@ def MarketWatch_Cash_Factor(string, value1, value2):
     factor = "%.2f" % round(100*(float(liabilities[0]['data'][4])/float(cash[0]['data'][4])))
     return factor
 
+def MarketWatch_Dividends(string, valuename):
+    dividend = MarKetWatch_Financials(string, valuename)
+    print(dividend)
+    return dividend[0]['data'][0]
+
 #MarketWatch Profile
 def MarketWatch_Profile(string, value):
     base = string.find('div', attrs={'class': 'element element--table'})
     section = base.findAll('tr', attrs={'class': 'table__row'})
-    print(section)
     all_data = []
     for item in section:
         data = {}
