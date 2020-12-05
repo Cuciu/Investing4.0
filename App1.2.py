@@ -21,11 +21,7 @@ def Read(url):
 
 #MacroTrends
 def Read_MacroTrends(url):
-    url_financial = url + 'financial-statements'
-    url_cashflow = url + 'cash-flow-statement'
-    #StringEPS0 = BeautifulSoup(URLHandler(url + 'financial-statements'), "html.parser")
-    #StringEPS = StringEPS0.find_all('div', attrs={'id': 'row21jqxgrid'})
-    #print(StringEPS)
+
     StringEPS0 = re.search('eps-earnings-per-share-diluted(.*)}];', URLHandler(url + 'financial-statements'))
     StringEPS = re.search('div>",(.*)}];', StringEPS0.group(0))
 
@@ -48,7 +44,7 @@ def student():
 def result():
     if request.method == 'POST':
         listofurls = []
-        for i in range(4):
+        for i in range(5):
             if request.form[f'Base_Link{i+1}'] != '':
                 baseurl = request.form[f'Base_Link{i+1}']
                 baseurl2 = request.form[f'MacroTrends_Link{i+1}']
@@ -63,7 +59,9 @@ def result():
         AverageInflation = float(request.form['AverageInflation'])
         NominalDiscountRate = float(RealDiscountRate + AverageInflation)
         strNominalDiscountRate = str("Nominal Discount Rate is {}%".format(NominalDiscountRate))
-        t = [['Stock', 'Net Income Growth 5 years', 'Net Income Growth Average', 'EPS Growth 5 years', 'EPS Growth Average', 'Current Liabilities/Current Cash factor', 'Total Liabilities/Total Cash factor', 'Price/Earnings', 'Total paid dividends', 'RORE last Year']]
+        t = [['Stock', 'Net Income Growth 5 years', 'Net Income Growth Average', 'EPS Growth 5 years', 'EPS Growth Average',
+              'Current Liabilities/Current Cash factor', 'Total Liabilities/Total Cash factor', 'Price/Earnings', 'Total paid dividends',
+              'RORE last Year', 'RORE 5 Years Average']]
 
         for item in listofurls:
             stockname = Read(item[0])[0]
@@ -114,7 +112,13 @@ def result():
             except:
                 r9 = 0
 
-            r = [stockname, r1, r2, r3, r4, r5, r6, r7, r8, r9]
+            try:
+                r10 = '{}'.format(MacroTrends_RORE(string_eps, string_dividends)[1])
+            except:
+                r10 = 0
+
+
+            r = [stockname, r1, r2, r3, r4, r5, r6, r7, r8, r9, r10]
             t.append(r)
 
         # listyears = Years(string_financials)
