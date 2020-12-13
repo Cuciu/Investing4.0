@@ -1,9 +1,13 @@
+import re
+import numpy as np
+
 def Convert(string):
     li = list(string.split(","))
     return li
 
-def MacroTrends_RORE(StringEPS, StringDividends):
+def MacroTrends_RORE(StringEPS, StringDividends, StringCurrentPrice, StringPrice,  NBShares, RealDiscountRate, AverageInflation):
 
+    Years = 5
     #EPS
     EPS = str(StringEPS.group(1).replace('"', ''))
     a1 = EPS.count(':')
@@ -44,5 +48,44 @@ def MacroTrends_RORE(StringEPS, StringDividends):
     RORE5years = "%.2f" % round(((float(RORE1) + float(RORE2) + float(RORE3) + float(RORE4) + float(RORE5)) / 5), 2)
     print(RORE5years)
 
-    r = [RORE1, RORE5years]
+    # Overpriced
+    CurrentPrice = re.findall("\d+\.\d+", StringCurrentPrice)
+    PriceNow = float(CurrentPrice[0])
+    PriceNow0 = str("Current Price is {}".format(PriceNow))
+
+    # Price 5 years ago
+
+    header = StringPrice.findAll('th')
+    headers = [th.text for th in header]
+    cells = []
+    rows = StringPrice.findAll('tr')
+    for tr in rows:
+        # Process the body of the table
+        td = tr.findAll('td')
+        for t in td:
+            a = re.findall('>(.*)<', str(t))
+            b = a[0]
+            cells.append(b)
+    Price5Years = float(cells[36])
+    cellsyears = [int(i) for i in cells[0::7]]
+    pricecells = [float(i) for i in cells[1::7]]
+
+    RetainedErnings = []
+    for i in range(0, Years):
+        a = NBShares * (float(listofEPS[i]) - float(listDividends[i]))
+        RetainedErnings.append(f"{round(float(a), 2):.2f}")
+    RetainedErnings = [float(i) for i in RetainedErnings]
+    NominalDiscountRate = RealDiscountRate + AverageInflation
+    NetPresentValue = np.npv(NominalDiscountRate, RetainedErnings)
+    NETPRESENT = str("Net present Value {}".format(NetPresentValue))
+    # EstimatedPrice
+    TotalValueYears = "%.2f" % round(
+        np.fv(-AverageInflation, Years, 0, -NetPresentValue) + np.fv(-AverageInflation, Years, 0,
+                                                                     -(NBShares * Price5Years)), 2)
+    TOTALVALUE = str("Total Value Years {}".format(TotalValueYears))
+    EstimatedPrice = "%.2f" % round((float(TotalValueYears) / float(NBShares)), 2)
+
+    Overpriced = "%.2f" % round(100 * (PriceNow / float(EstimatedPrice) - 1), 2)
+
+    r = [RORE1, RORE5years, Overpriced]
     return r
