@@ -16,6 +16,7 @@ Through this app you  will be able to apply some of the basic Value Investing fo
 * Price/Earnings
 * RORE for last Year
 * 5 years RORE Average
+* Overpriced
 
 #Demo 
 ![Demo Image](https://www.skyalleys.com/wp-content/uploads/2020/12/Value-Investing.jpg)
