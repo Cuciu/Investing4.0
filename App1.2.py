@@ -31,7 +31,15 @@ def Read_MacroTrends(url):
     else:
         StringDividends0 = re.search('Common Stock Dividends Paid(.*)}];', URLHandler(url + 'cash-flow-statement'))
         StringDividends = re.search('popup_icon(.*)}', StringDividends0.group(0))
-    r = [StringEPS, StringDividends]
+
+    StringCurrentPrice0 = re.findall('content=(.*)&lt;/strong&gt', URLHandler(url + 'stock-price-history'))
+    StringCurrentPrice = StringCurrentPrice0[1].replace('&lt;strong&gt;', '')
+
+    StringPrice0 = BeautifulSoup(URLHandler(url + 'stock-price-history'), 'html.parser')
+    StringPrice = StringPrice0.find('table')
+
+    r = [StringEPS, StringDividends, StringCurrentPrice, StringPrice]
+
     return r
 
 app = Flask(__name__)
@@ -57,11 +65,9 @@ def result():
         NBShares = int(request.form['Number_Shares'])
         RealDiscountRate = float(request.form['RealDiscountRate'])
         AverageInflation = float(request.form['AverageInflation'])
-        NominalDiscountRate = float(RealDiscountRate + AverageInflation)
-        strNominalDiscountRate = str("Nominal Discount Rate is {}%".format(NominalDiscountRate))
         t = [['Stock', 'Net Income Growth 5 years', 'Net Income Growth Average', 'EPS Growth 5 years', 'EPS Growth Average',
-              'Current Liabilities/Current Cash factor', 'Total Liabilities/Total Cash factor', 'Price/Earnings', 'Total paid dividends',
-              'RORE last Year', 'RORE 5 Years Average']]
+              'Current Liabilities/Current Cash factor', 'Total Liabilities/Total Assets factor', 'Price/Earnings', 'Total paid dividends',
+              'RORE last Year', 'RORE 5 Years Average', 'Overpriced']]
 
         for item in listofurls:
             stockname = Read(item[0])[0]
@@ -106,19 +112,25 @@ def result():
 
             string_eps = Read_MacroTrends(item[1])[0]
             string_dividends = Read_MacroTrends(item[1])[1]
+            string_current_price = Read_MacroTrends(item[1])[2]
+            string_price = Read_MacroTrends(item[1])[3]
 
             try:
-                r9 = '{}'.format(MacroTrends_RORE(string_eps, string_dividends)[0])
+                r9 = '{}'.format(MacroTrends_RORE(string_eps, string_dividends, string_current_price, string_price, NBShares, RealDiscountRate, AverageInflation)[0])
             except:
                 r9 = 0
 
             try:
-                r10 = '{}'.format(MacroTrends_RORE(string_eps, string_dividends)[1])
+                r10 = '{}'.format(MacroTrends_RORE(string_eps, string_dividends, string_current_price, string_price,  NBShares, RealDiscountRate, AverageInflation)[1])
             except:
                 r10 = 0
 
+            try:
+                r11 = '{}'.format(MacroTrends_RORE(string_eps, string_dividends, string_current_price, string_price,  NBShares, RealDiscountRate, AverageInflation)[2])
+            except:
+                r11 = 0
 
-            r = [stockname, r1, r2, r3, r4, r5, r6, r7, r8, r9, r10]
+            r = [stockname, r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11]
             t.append(r)
 
         # listyears = Years(string_financials)
