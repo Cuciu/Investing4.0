@@ -19,7 +19,7 @@ Through this app you  will be able to apply some of the basic Value Investing fo
 * Overpriced
 
 #Demo 
-![Demo Image](https://www.skyalleys.com/wp-content/uploads/2020/12/Value-Investing.jpg)
+![Demo Image](https://www.skyalleys.com/wp-content/uploads/2021/01/Investing-Stock-Comparision-with-Trend-lines.png)
 
 # Explaining the Overpriced formula:
 This formula was developed by myself in order to asses if the current price is corelated with the earnings of the company in the last five years. We know the price 5 years ago, if then the future price after 5 years would have been calculated based on the earnings for the next years, 100% correctly estimated, What price would make sense now?
