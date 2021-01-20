@@ -156,7 +156,7 @@ def result():
         temp = df.to_dict('records')
         columnNames = df.columns.values
 
-        return render_template("result.html", records=temp, colnames=columnNames, graphdata=graphdata, labels='Years', values='Price')
+        return render_template("result2.html", records=temp, colnames=columnNames, graphdata=graphdata, labels='Years', values='Price')
 
 if __name__ == '__main__':
     app.run(debug=True)
