@@ -136,8 +136,8 @@ def result():
 
             try:
                 r13 = MacroTrends_RORE(string_eps, string_dividends, string_current_price, string_price,  NBShares, RealDiscountRate, AverageInflation)[4]
+                print(r13)
             except:
-
                 r13 = 0
 
             r = [stockname, r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11]
@@ -147,7 +147,10 @@ def result():
             if r13 != 0:
                 graphdata[0].append(stockname)
                 for i in range(19):
-                    graphdata[i+1].append(r13[i])
+                    try:
+                        graphdata[i+1].append(r13[i])
+                    except:
+                        graphdata[i+1].append(0)
             print(graphdata)
 
         #format table data
