@@ -1,0 +1,162 @@
+from flask import Flask, render_template, request, redirect, url_for
+from URLHandler import URLHandler
+from MarketWatch02 import MarketWatch_Value_Growth, MarketWatch_Cash_Factor, MarketWatch_Dividends, MarketWatch_Profile
+from MacroTrends import MacroTrends_RORE
+from bs4 import BeautifulSoup
+import pandas as pd
+import datetime
+import re
+
+# MarketWatch
+def Read(url):
+    stockname = url.replace('https://www.marketwatch.com/investing/stock/', '')
+    string_financials = BeautifulSoup(URLHandler(str(url) + '/financials'), "html.parser")
+    financials = string_financials.find_all('div', attrs={'class': 'cell__content fixed--cell'})
+    string_balancesheet = BeautifulSoup(URLHandler(str(url) + '/financials/balance-sheet'), 'html.parser')
+    balancesheet = string_balancesheet.find_all('div', attrs={'class': 'cell__content fixed--cell'})
+    string_cashflow = BeautifulSoup(URLHandler(url + '/financials/cash-flow'), "html.parser")
+    cashflow = string_cashflow.find_all('div', attrs={'class': 'cell__content fixed--cell'})
+    string_profile = BeautifulSoup(URLHandler(str(url) + '/profile'), "html.parser")
+    r = [stockname, financials, balancesheet, cashflow, string_profile]
+    return r
+
+#MacroTrends
+def Read_MacroTrends(url):
+
+    if url != '':
+        StringEPS0 = re.search('eps-earnings-per-share-diluted(.*)}];', URLHandler(url + 'financial-statements'))
+        StringEPS = re.search('div>",(.*)}];', StringEPS0.group(0))
+
+        if 'common-stock-dividends-paid' in URLHandler(url + 'cash-flow-statement'):
+            StringDividends0 = re.search('common-stock-dividends-paid(.*)}];', URLHandler(url + 'cash-flow-statement'))
+            StringDividends = re.search('/div>"(.*)}', StringDividends0.group(0))
+        else:
+            StringDividends0 = re.search('Common Stock Dividends Paid(.*)}];', URLHandler(url + 'cash-flow-statement'))
+            StringDividends = re.search('popup_icon(.*)}', StringDividends0.group(0))
+
+        StringCurrentPrice0 = re.findall('content=(.*)&lt;/strong&gt', URLHandler(url + 'stock-price-history'))
+        StringCurrentPrice = StringCurrentPrice0[1].replace('&lt;strong&gt;', '')
+
+        StringPrice0 = BeautifulSoup(URLHandler(url + 'stock-price-history'), 'html.parser')
+        StringPrice = StringPrice0.find('table')
+        r = [StringEPS, StringDividends, StringCurrentPrice, StringPrice]
+    else:
+        r = [0,0,0,0]
+    return r
+
+app = Flask(__name__)
+
+@app.route('/')
+def student():
+    return render_template('index.html')
+
+@app.route('/result', methods=['POST', 'GET'])
+def result():
+    if request.method == 'POST':
+        listofurls = []
+        for i in range(10):
+            if request.form[f'Base_Link{i+1}'] != '':
+                baseurl = 'https://www.marketwatch.com/investing/stock/' + request.form[f'Base_Link{i+1}']
+                baseurl2 = 'https://www.macrotrends.net/stocks/charts/' + request.form[f'Base_Link{i+1}'] + '/' + request.form[f'MacroTrends_Link{i+1}'] + '/'
+                urls = [baseurl, baseurl2]
+                print(urls)
+                listofurls.append(urls)
+        print(listofurls)
+
+        #Years = int(request.form['Years'])
+        NBShares = int(request.form['Number_Shares'])
+        RealDiscountRate = float(request.form['RealDiscountRate'])
+        AverageInflation = float(request.form['AverageInflation'])
+        t = [['Stock', 'Net Income Growth 5 years', 'Net Income Growth Average', 'EPS Growth 5 years', 'EPS Growth Average',
+              'Current Liabilities/Current Cash factor', 'Total Liabilities/Total Assets factor', 'Price/Earnings', 'Total paid dividends',
+              'RORE last Year', 'RORE 5 Years Average', 'Overpriced']]
+        now = datetime.datetime.now()
+        graphdata = [['Year']] + [[now.year-i] for i in range(19)]
+
+        for item in listofurls:
+            stockname = Read(item[0])[0]
+            print(stockname)
+            string_financials = Read(item[0])[1]
+            string_balancesheet = Read(item[0])[2]
+            string_cashflow = Read(item[0])[3]
+            string_profile = Read(item[0])[4]
+
+            # Net Income Growth
+            try:
+                r1 = '{}%'.format(MarketWatch_Value_Growth(string_financials, 'Consolidated Net Income')[0])
+                r2 = '{}%'.format(MarketWatch_Value_Growth(string_financials, 'Consolidated Net Income')[1])
+            except:
+                r1 = 0
+                r2 = 0
+            # EPS Growth
+            try:
+                r3 = '{}%'.format(MarketWatch_Value_Growth(string_financials, 'EPS (Diluted)')[0])
+                r4 = '{}%'.format(MarketWatch_Value_Growth(string_financials, 'EPS (Diluted)')[1])
+            except:
+                r3 = 0
+                r4 = 0
+            #Current Liabilities/Current Cash factor
+            # Total Liabilities/Total Assets
+            try:
+                r5 = '{}%'.format(MarketWatch_Cash_Factor(string_balancesheet, 'Total Current Liabilities', 'Cash & Short Term Investments'))
+                r6 = '{}%'.format(MarketWatch_Cash_Factor(string_balancesheet, 'Total Liabilities', 'Total Assets'))
+            except:
+                r5 = 0
+                r6 = 0
+            #Price per ernings
+            try:
+                r7 = '{}'.format(MarketWatch_Profile(string_profile, 'P/E Current')[0]['data'])
+            except:
+                   r7 = 0
+            try:
+                r8 = '{}'.format(MarketWatch_Dividends(string_cashflow, 'Cash Dividends Paid - Total'))
+                print(r8)
+            except:
+                r8 = 0
+
+            string_eps = Read_MacroTrends(item[1])[0]
+            string_dividends = Read_MacroTrends(item[1])[1]
+            string_current_price = Read_MacroTrends(item[1])[2]
+            string_price = Read_MacroTrends(item[1])[3]
+
+            try:
+                r9 = '{}'.format(MacroTrends_RORE(string_eps, string_dividends, string_current_price, string_price, NBShares, RealDiscountRate, AverageInflation)[0])
+            except:
+                r9 = 0
+
+            try:
+                r10 = '{}'.format(MacroTrends_RORE(string_eps, string_dividends, string_current_price, string_price,  NBShares, RealDiscountRate, AverageInflation)[1])
+            except:
+                r10 = 0
+
+            try:
+                r11 = '{}'.format(MacroTrends_RORE(string_eps, string_dividends, string_current_price, string_price,  NBShares, RealDiscountRate, AverageInflation)[2])
+            except:
+                r11 = 0
+
+            try:
+                r13 = MacroTrends_RORE(string_eps, string_dividends, string_current_price, string_price,  NBShares, RealDiscountRate, AverageInflation)[4]
+            except:
+
+                r13 = 0
+
+            r = [stockname, r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11]
+            t.append(r)
+
+            #graph data
+            if r13 != 0:
+                graphdata[0].append(stockname)
+                for i in range(19):
+                    graphdata[i+1].append(r13[i])
+            print(graphdata)
+
+        #format table data
+        t = [x for x in t if str(x) != 'nan']
+        df = pd.DataFrame(t, columns=t.pop(0))
+        temp = df.to_dict('records')
+        columnNames = df.columns.values
+
+        return render_template("result.html", records=temp, colnames=columnNames, graphdata=graphdata, labels='Years', values='Price')
+
+if __name__ == '__main__':
+    app.run(debug=True)
